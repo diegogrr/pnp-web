@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Tabelas</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      background: #f4f4f4;
+      color: #222;
+    }
+
+    /* ── Cabeçalho ── */
+    header {
+      background: #1a5c2a;
+      color: #fff;
+      padding: 16px 24px;
+    }
+    header h1 { font-size: 1.2rem; font-weight: 600; }
+    header p  { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
+
+    /* ── Layout principal ── */
+    main {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    /* ── Card de seleção ── */
+    .card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1a5c2a;
+      margin-bottom: 16px;
+      border-bottom: 2px solid #1a5c2a;
+      padding-bottom: 6px;
+    }
+
+    /* ── Formulário ── */
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 200px;
+    }
+    .form-group label {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .form-group select,
+    .form-group input[type="text"] {
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background: #fff;
+      width: 100%;
+    }
+    .form-group select:focus,
+    .form-group input[type="text"]:focus {
+      outline: 2px solid #1a5c2a;
+      border-color: #1a5c2a;
+    }
+    .form-group select:disabled { background: #f0f0f0; color: #888; }
+
+    /* ── Botões ── */
+    .btn {
+      padding: 9px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: #1a5c2a;
+      color: #fff;
+    }
+    .btn-primary:hover:not(:disabled) { background: #154d23; }
+    .btn-primary:disabled { background: #7aab85; cursor: not-allowed; }
+    .btn-secondary {
+      background: #fff;
+      color: #1a5c2a;
+      border: 2px solid #1a5c2a;
+    }
+    .btn-secondary:hover { background: #eaf2ec; }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid #fff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Mensagem de erro ── */
+    .msg-erro {
+      background: #fff3f3;
+      border: 1px solid #f5c6c6;
+      color: #a00;
+      border-radius: 4px;
+      padding: 12px 16px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    /* ── Barra de ações pós-processamento ── */
+    .barra-export {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+    .barra-export span { font-size: 0.85rem; color: #555; }
+
+    /* ── Painel de abas ── */
+    .abas-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      border-bottom: 2px solid #1a5c2a;
+      margin-bottom: 0;
+    }
+    .aba-btn {
+      padding: 7px 16px;
+      border: 1px solid #ccc;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      background: #f0f0f0;
+      color: #444;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .aba-btn:hover { background: #e0ece3; color: #1a5c2a; }
+    .aba-btn.ativa {
+      background: #1a5c2a;
+      color: #fff;
+      border-color: #1a5c2a;
+    }
+
+    .aba-conteudo {
+      display: none;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-top: none;
+      padding: 16px;
+      overflow-x: auto;
+    }
+    .aba-conteudo.ativa { display: block; }
+
+    /* ── Tabelas ── */
+    table {
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      min-width: 100%;
+    }
+    th {
+      background: #1a5c2a;
+      color: #fff;
+      padding: 7px 10px;
+      text-align: center;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    td {
+      padding: 6px 10px;
+      text-align: center;
+      border-bottom: 1px solid #e8e8e8;
+      white-space: nowrap;
+    }
+    tr:nth-child(even) td { background: #f7faf7; }
+    tr:hover td { background: #eaf2ec; }
+
+    /* ── Rodapé ── */
+    footer {
+      background: #1a5c2a;
+      color: #fff;
+      margin-top: 32px;
+      padding: 20px 24px;
+      font-size: 0.82rem;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    footer strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    footer ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 32px;
+      margin-bottom: 10px;
+    }
+    footer a {
+      color: #a8d5b0;
+      text-decoration: none;
+    }
+    footer a:hover { text-decoration: underline; }
+    footer span {
+      opacity: 0.75;
+      font-size: 0.78rem;
+    }
+
+    /* ── Responsivo ── */
+    @media (max-width: 600px) {
+      .form-row { flex-direction: column; }
+      .form-group { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Gerador de Tabelas - Fase 2: Diagnóstico Quantitativo</h1>
+  <p>Dados da PNP sobre o IFSP</p>
+</header>
+
+<main>
+
+  <!-- Card de seleção -->
+  <div class="card">
+    <h2>Seleção</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="sel-unidade">Unidade de Ensino</label>
+        <select id="sel-unidade">
+          <option value="">Carregando...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="sel-curso">Curso</label>
+        <select id="sel-curso" disabled>
+          <option value="">Selecione uma unidade primeiro</option>
+        </select>
+      </div>
+      <div class="form-group" style="max-width:240px;">
+        <label for="inp-arquivo">Nome do arquivo de saída</label>
+        <input type="text" id="inp-arquivo" placeholder="saida.xlsx">
+      </div>
+      <div class="form-group" style="flex:0;">
+        <label style="visibility:hidden;">.</label>
+        <button class="btn btn-primary" id="btn-processar" disabled>
+          Processar
+        </button>
+      </div>
+    </div>
+
+    <div class="msg-erro" id="msg-erro"></div>
+
+    <!-- Barra de exportação (aparece após processamento) -->
+    <div class="barra-export" id="barra-export">
+      <span>Processamento concluído.</span>
+      <button class="btn btn-secondary" id="btn-exportar">
+        ⬇ Exportar como .xlsx
+      </button>
+    </div>
+  </div>
+
+  <!-- Painel de abas (aparece após processamento) -->
+  <div id="painel-abas" style="display:none;">
+    <div class="abas-nav" id="abas-nav"></div>
+    <div id="abas-conteudo"></div>
+  </div>
+
+</main>
+
+<script>
+  const selUnidade  = document.getElementById('sel-unidade');
+  const selCurso    = document.getElementById('sel-curso');
+  const inpArquivo  = document.getElementById('inp-arquivo');
+  const btnProcessar = document.getElementById('btn-processar');
+  const btnExportar  = document.getElementById('btn-exportar');
+  const msgErro      = document.getElementById('msg-erro');
+  const barraExport  = document.getElementById('barra-export');
+  const painelAbas   = document.getElementById('painel-abas');
+  const abasNav      = document.getElementById('abas-nav');
+  const abasConteudo = document.getElementById('abas-conteudo');
+
+  function mostrarErro(msg) {
+    msgErro.textContent = msg;
+    msgErro.style.display = 'block';
+  }
+  function limparErro() {
+    msgErro.style.display = 'none';
+    msgErro.textContent = '';
+  }
+
+  // ── Carrega unidades ao abrir a página ──
+  fetch('/unidades')
+    .then(r => r.json())
+    .then(lista => {
+      selUnidade.innerHTML = '<option value="">— Selecione —</option>';
+      lista.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = opt.textContent = u;
+        selUnidade.appendChild(opt);
+      });
+    })
+    .catch(() => mostrarErro('Não foi possível carregar as unidades.'));
+
+  // ── Atualiza cursos via AJAX ao selecionar unidade ──
+  selUnidade.addEventListener('change', () => {
+    const unidade = selUnidade.value;
+    limparErro();
+    btnProcessar.disabled = true;
+    selCurso.disabled = true;
+    selCurso.innerHTML = '<option value="">Carregando...</option>';
+
+    if (!unidade) {
+      selCurso.innerHTML = '<option value="">Selecione uma unidade primeiro</option>';
+      return;
+    }
+
+    fetch('/cursos?unidade=' + encodeURIComponent(unidade))
+      .then(r => r.json())
+      .then(lista => {
+        selCurso.innerHTML = '<option value="">— Selecione —</option>';
+        lista.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = opt.textContent = c;
+          selCurso.appendChild(opt);
+        });
+        selCurso.disabled = false;
+      })
+      .catch(() => mostrarErro('Não foi possível carregar os cursos.'));
+  });
+
+  // ── Habilita botão Processar ao selecionar curso ──
+  selCurso.addEventListener('change', () => {
+    btnProcessar.disabled = !selCurso.value;
+    limparErro();
+  });
+
+  // ── Processar ──
+  btnProcessar.addEventListener('click', () => {
+    limparErro();
+    barraExport.style.display = 'none';
+    painelAbas.style.display  = 'none';
+
+    btnProcessar.disabled = true;
+    btnProcessar.innerHTML = '<span class="spinner"></span>Processando…';
+
+    fetch('/processar', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        unidade: selUnidade.value,
+        curso:   selCurso.value,
+      }),
+    })
+    .then(r => r.json())
+    .then(dados => {
+      btnProcessar.disabled = false;
+      btnProcessar.textContent = 'Processar';
+
+      if (dados.erro) { mostrarErro(dados.erro); return; }
+
+      renderizarAbas(dados);
+      barraExport.style.display = 'flex';
+      painelAbas.style.display  = 'block';
+
+      // Sugere nome de arquivo com base no curso
+      const nomeSugerido = selCurso.value.replace(/[^a-zA-Z0-9À-ú ]/g, '').trim().substring(0, 40);
+      inpArquivo.value = nomeSugerido || 'saida';
+    })
+    .catch(() => {
+      btnProcessar.disabled = false;
+      btnProcessar.textContent = 'Processar';
+      mostrarErro('Erro de comunicação com o servidor.');
+    });
+  });
+
+  // ── Exportar ──
+  btnExportar.addEventListener('click', () => {
+    let nome = inpArquivo.value.trim() || 'saida';
+    if (!nome.endsWith('.xlsx')) nome += '.xlsx';
+
+    fetch('/exportar', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        unidade:      selUnidade.value,
+        curso:        selCurso.value,
+        nome_arquivo: nome,
+      }),
+    })
+    .then(r => {
+      if (!r.ok) return r.json().then(j => { throw new Error(j.erro); });
+      return r.blob();
+    })
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href = url;
+      a.download = nome;
+      a.click();
+      URL.revokeObjectURL(url);
+    })
+    .catch(e => mostrarErro(e.message || 'Erro ao exportar o arquivo.'));
+  });
+
+  // ── Renderiza painel de abas ──
+  function renderizarAbas(dados) {
+    abasNav.innerHTML      = '';
+    abasConteudo.innerHTML = '';
+
+    const ordemAbas = ['Acesso', 'Matrícula', 'Conclusão', 'Evasão', 'Retenção', 'Eficiência', 'PAP'];
+
+    ordemAbas.forEach((aba, idx) => {
+      if (!dados[aba]) return;
+
+      // Botão da aba
+      const btn = document.createElement('button');
+      btn.className = 'aba-btn' + (idx === 0 ? ' ativa' : '');
+      btn.textContent = aba;
+      btn.dataset.aba = aba;
+      btn.addEventListener('click', () => ativarAba(aba));
+      abasNav.appendChild(btn);
+
+      // Conteúdo da aba
+      const div = document.createElement('div');
+      div.className = 'aba-conteudo' + (idx === 0 ? ' ativa' : '');
+      div.id = 'aba-' + aba;
+
+      const { colunas, linhas } = dados[aba];
+      if (!linhas || linhas.length === 0) {
+        div.innerHTML = '<p style="color:#888;padding:8px;">Sem dados para exibir.</p>';
+      } else {
+        div.appendChild(criarTabela(colunas, linhas));
+      }
+      abasConteudo.appendChild(div);
+    });
+  }
+
+  function ativarAba(nome) {
+    document.querySelectorAll('.aba-btn').forEach(b =>
+      b.classList.toggle('ativa', b.dataset.aba === nome));
+    document.querySelectorAll('.aba-conteudo').forEach(d =>
+      d.classList.toggle('ativa', d.id === 'aba-' + nome));
+  }
+
+  function criarTabela(colunas, linhas) {
+    const table = document.createElement('table');
+    const thead = table.createTHead();
+    const tr    = thead.insertRow();
+    colunas.forEach(col => {
+      const th = document.createElement('th');
+      th.textContent = col;
+      tr.appendChild(th);
+    });
+    const tbody = table.createTBody();
+    linhas.forEach(linha => {
+      const row = tbody.insertRow();
+      linha.forEach(val => {
+        const td = row.insertCell();
+        td.textContent = val === null ? '' : val;
+      });
+    });
+    return table;
+  }
+</script>
+
+<footer>
+  <div class="footer-inner">
+    <strong>Aviso</strong>
+    <ul>
+      <li>
+        A Plataforma Nilo Peçanha (PNP) é um instrumento incrível de consolidação de dados e que permite fazer consultas de dados acadêmicos relacionados às instituições da Rede Federal de maneira muito simples e rápida. No entanto, a coisa muda um pouco de figura quando é necessário fazer uma extração mais específica e repetitiva.
+        Este script usa os microdados disponibilizados pela própria Plataforma Nilo Peçanha e otimizados para serem tratados com Python/Pandas. A metodologia utilizada pela PNP e reproduzida aqui está detalhada na documentação nesta <a href="https://www.gov.br/mec/pt-br/pnp/referencia-metodologica" target="_blank">página</a>.
+        Ressalto que este trabalho foi realizado voluntariamente, com o intuito de ajudar os colegas com a tarefa repetitiva de consultar e planilhar dados. Não foi realizada uma validação exaustiva, de modo que aconselho a verificação com os dados disponíveis na PNP.
+        Se tiverem dúvidas, sugestões ou outras necessidades envolvendo dados institucionais, podemos trocar uma ideia por email.<br>
+        Prof. Nilson Inocente | IFSP Campus Salto | Abril de 2026
+      </li>
+    </ul>
+    <strong>Créditos</strong>
+    <ul>
+      <li>
+        Concepção, pesquisa e metodologia de análise dos dados da PNP:
+        Prof. Nilson Inocente —
+        <a href="mailto:inocente@ifsp.edu.br">inocente@ifsp.edu.br</a>
+      </li>
+      <li>
+        Sistema Web:
+        Prof. Diego Garrido —
+        <a href="mailto:diego@ifsp.edu.br">diego@ifsp.edu.br</a>
+      </li>
+    </ul>
+    <span>CIPEE-SLT</span>
+  </div>
+</footer>
+
+</body>
+</html>

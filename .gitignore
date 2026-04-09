@@ -1,0 +1,114 @@
+# =============================================================================
+# pnp-web — .gitignore
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Arquivos de contexto para IA (Claude Code / LLMs)
+# Usados apenas para orientar o assistente — não pertencem ao repositório
+# -----------------------------------------------------------------------------
+CLAUDE.md
+.claude/
+memory/
+docs/specs/
+docs/GeraTabelasPNP.ipynb
+
+# Configuração de MCP (pode conter tokens/chaves de API)
+.mcp.json
+
+# Notebook original (fonte de inspiração, não parte da aplicação)
+**/*.ipynb
+
+# -----------------------------------------------------------------------------
+# Python
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Ambientes virtuais
+venv/
+.venv/
+env/
+.env/
+ENV/
+env.bak/
+venv.bak/
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+*.env
+secrets.json
+secrets.yaml
+secrets.yml
+
+# -----------------------------------------------------------------------------
+# Flask / runtime
+# -----------------------------------------------------------------------------
+instance/
+.webassets-cache
+flask_session/
+
+# -----------------------------------------------------------------------------
+# Ferramentas de desenvolvimento
+# -----------------------------------------------------------------------------
+# pytest
+.pytest_cache/
+.cache/
+pytest.ini
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# mypy / type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# IDEs e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# -----------------------------------------------------------------------------
+# Docker
+# (docker-compose.yml e Dockerfile são versionados — apenas overrides locais)
+# -----------------------------------------------------------------------------
+docker-compose.override.yml
+docker-compose.local.yml
+
+# -----------------------------------------------------------------------------
+# Logs e temporários
+# -----------------------------------------------------------------------------
+*.log
+*.tmp
+*.bak
+*.orig
+/tmp/
+/temp/
