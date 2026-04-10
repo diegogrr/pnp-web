@@ -187,7 +187,8 @@ def processar(unidade, curso):
 
     # --- Matrícula ---
     df_totais = df_curso.groupby(['Ano'])['Código da Matricula'].count().to_frame(name='Quant.')
-    tabela1 = df_totais
+    index_row = pd.Index(range(ano_inicial, ano_final+1))
+    tabela1 = df_totais.reindex(index_row).fillna(0).astype(int)
     tabela2 = gera_tabela_estratificada(df_curso, 'Cor / Raça')
     tabela3 = gera_tabela_estratificada(df_curso, 'Renda Familiar')
     tabela4 = gera_tabela_estratificada(df_curso, 'Sexo')
@@ -197,7 +198,6 @@ def processar(unidade, curso):
     df_concluintes = df_curso[df_curso['Concluinte'] == 1]
     df_totais_concl = df_concluintes.groupby(['Ano'])['Código da Matricula'].count().to_frame(name='Quant.')
     df_totais_concl['%'] = (df_totais_concl['Quant.']/df_totais['Quant.']*100).round(2)
-    index_row = pd.Index(range(ano_inicial, ano_final+1))
     tabela6  = df_totais_concl.reindex(index_row).convert_dtypes().fillna(0)
     tabela7  = gera_tabela_estratificada(df_concluintes, 'Cor / Raça')
     tabela8  = gera_tabela_estratificada(df_concluintes, 'Renda Familiar')
