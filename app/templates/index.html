@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerador de Tabelas</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <base href="{{ url_for('main.index') }}">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -322,7 +324,7 @@
   }
 
   // ── Carrega unidades ao abrir a página ──
-  fetch('/unidades')
+  fetch('unidades')
     .then(r => r.json())
     .then(lista => {
       selUnidade.innerHTML = '<option value="">— Selecione —</option>';
@@ -347,7 +349,7 @@
       return;
     }
 
-    fetch('/cursos?unidade=' + encodeURIComponent(unidade))
+    fetch('cursos?unidade=' + encodeURIComponent(unidade))
       .then(r => r.json())
       .then(lista => {
         selCurso.innerHTML = '<option value="">— Selecione —</option>';
@@ -376,7 +378,7 @@
     btnProcessar.disabled = true;
     btnProcessar.innerHTML = '<span class="spinner"></span>Processando…';
 
-    fetch('/processar', {
+    fetch('processar', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -411,7 +413,7 @@
     let nome = inpArquivo.value.trim() || 'saida';
     if (!nome.endsWith('.xlsx')) nome += '.xlsx';
 
-    fetch('/exportar', {
+    fetch('exportar', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
