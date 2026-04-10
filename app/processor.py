@@ -127,6 +127,9 @@ def gera_eficiencia_ciclo(df):
         list_indicadores.append(df_ciclo.groupby(['Situação Ciclo'])['Código da Matricula'].count().to_frame(name=ano).T)
     df_indicadores = pd.concat(list_indicadores)
 
+    for col in ['Conclusão', 'Em Curso', 'Evasão']:
+        if col not in df_indicadores.columns:
+            df_indicadores[col] = 0
     df_indicadores['Total'] = df_indicadores.sum(axis=1)
     df_indicadores['IEA'] = ((df_indicadores['Conclusão']+df_indicadores['Conclusão']*df_indicadores['Em Curso']/(df_indicadores['Conclusão']+df_indicadores['Evasão']))/df_indicadores['Total']*100).round(2)
     return df_indicadores
@@ -144,6 +147,9 @@ def gera_eficiencia_ciclo_estratificado(df, prop):
         list_indicadores.append(df_ciclo.groupby(['Situação Ciclo', prop])['Código da Matricula'].count().to_frame(name=ano).unstack().T)
     df_indicadores = pd.concat(list_indicadores)
 
+    for col in ['Conclusão', 'Em Curso', 'Evasão']:
+        if col not in df_indicadores.columns:
+            df_indicadores[col] = 0
     df_indicadores['Total'] = df_indicadores.sum(axis=1)
     df_indicadores = df_indicadores.fillna(0)
     df_indicadores['IEA'] = ((df_indicadores['Conclusão']+df_indicadores['Conclusão']*df_indicadores['Em Curso']/(df_indicadores['Conclusão']+df_indicadores['Evasão']))/df_indicadores['Total']*100).round(2)
