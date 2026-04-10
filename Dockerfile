@@ -11,4 +11,4 @@ COPY data/ ./data/
 
 EXPOSE 5005
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5005", "--workers", "2", "--timeout", "120", "app:create_app()"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5005", "--workers", "1", "--worker-class", "gthread", "--threads", "4", "--timeout", "600", "app:create_app()"]
