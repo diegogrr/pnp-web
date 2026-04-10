@@ -16,7 +16,7 @@
       color: #222;
     }
 
-    /* ── Cabeçalho ── */
+    /* -- Cabecalho -- */
     header {
       background: #1a5c2a;
       color: #fff;
@@ -25,14 +25,14 @@
     header h1 { font-size: 1.2rem; font-weight: 600; }
     header p  { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
 
-    /* ── Layout principal ── */
+    /* -- Layout principal -- */
     main {
       max-width: 1200px;
       margin: 24px auto;
       padding: 0 16px;
     }
 
-    /* ── Card de seleção ── */
+    /* -- Card de selecao -- */
     .card {
       background: #fff;
       border: 1px solid #ddd;
@@ -49,44 +49,166 @@
       padding-bottom: 6px;
     }
 
-    /* ── Formulário ── */
-    .form-row {
+    /* -- Linhas de filtro -- */
+    .filter-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 16px;
-      align-items: flex-end;
+      gap: 12px;
+      margin-bottom: 12px;
     }
-    .form-group {
+    .filter-group {
       display: flex;
       flex-direction: column;
       gap: 4px;
       flex: 1;
       min-width: 200px;
     }
-    .form-group label {
+    .filter-group label {
       font-weight: 600;
       font-size: 0.82rem;
       color: #444;
       text-transform: uppercase;
       letter-spacing: 0.03em;
     }
-    .form-group select,
-    .form-group input[type="text"] {
+
+    /* -- Action row -- */
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+      margin-top: 4px;
+    }
+    .action-row .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .action-row .form-group label {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .action-row input[type="text"] {
       padding: 8px 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
       font-size: 0.9rem;
       background: #fff;
-      width: 100%;
+      width: 220px;
     }
-    .form-group select:focus,
-    .form-group input[type="text"]:focus {
+    .action-row input[type="text"]:focus {
       outline: 2px solid #1a5c2a;
       border-color: #1a5c2a;
     }
-    .form-group select:disabled { background: #f0f0f0; color: #888; }
 
-    /* ── Botões ── */
+    /* -- Multi-select component -- */
+    .ms {
+      position: relative;
+    }
+    .ms-trigger {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      min-height: 38px;
+      user-select: none;
+    }
+    .ms-trigger:hover { border-color: #1a5c2a; }
+    .ms-trigger .ms-label {
+      color: #555;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+    .ms-trigger .ms-badge {
+      background: #1a5c2a;
+      color: #fff;
+      border-radius: 10px;
+      padding: 1px 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-left: 6px;
+      flex-shrink: 0;
+    }
+    .ms-trigger .ms-arrow {
+      margin-left: 6px;
+      font-size: 0.65rem;
+      color: #888;
+      flex-shrink: 0;
+    }
+    .ms-panel {
+      display: none;
+      position: absolute;
+      z-index: 200;
+      top: calc(100% + 2px);
+      left: 0;
+      right: 0;
+      min-width: 260px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .ms-panel.open { display: block; }
+    .ms-search {
+      width: calc(100% - 16px);
+      margin: 8px;
+      padding: 5px 8px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      font-size: 0.82rem;
+    }
+    .ms-search:focus { outline: 1px solid #1a5c2a; border-color: #1a5c2a; }
+    .ms-actions {
+      display: flex;
+      gap: 8px;
+      padding: 4px 10px 6px;
+      border-bottom: 1px solid #eee;
+    }
+    .ms-actions button {
+      font-size: 0.78rem;
+      color: #1a5c2a;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+    .ms-actions button:hover { color: #154d23; }
+    .ms-list {
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+    .ms-list label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: normal;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .ms-list label:hover { background: #eaf2ec; }
+    .ms-list label.unavailable {
+      opacity: 0.4;
+      text-decoration: line-through;
+      pointer-events: none;
+    }
+    .ms-list input[type="checkbox"] { accent-color: #1a5c2a; flex-shrink: 0; }
+
+    /* -- Botoes -- */
     .btn {
       padding: 9px 20px;
       border: none;
@@ -107,9 +229,14 @@
       color: #1a5c2a;
       border: 2px solid #1a5c2a;
     }
-    .btn-secondary:hover { background: #eaf2ec; }
+    .btn-secondary:hover:not(:disabled) { background: #eaf2ec; }
+    .btn-secondary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary .spinner {
+      border-color: #1a5c2a;
+      border-top-color: transparent;
+    }
 
-    /* ── Spinner ── */
+    /* -- Spinner -- */
     .spinner {
       display: inline-block;
       width: 16px; height: 16px;
@@ -122,7 +249,7 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Mensagem de erro ── */
+    /* -- Mensagem de erro -- */
     .msg-erro {
       background: #fff3f3;
       border: 1px solid #f5c6c6;
@@ -133,7 +260,19 @@
       display: none;
     }
 
-    /* ── Barra de ações pós-processamento ── */
+    /* -- Aviso de volume -- */
+    .msg-aviso {
+      background: #fffbe6;
+      border: 1px solid #f0dfa0;
+      color: #8a6d00;
+      border-radius: 4px;
+      padding: 10px 16px;
+      margin-top: 12px;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    /* -- Barra de acoes pos-processamento -- */
     .barra-export {
       display: none;
       align-items: center;
@@ -144,7 +283,7 @@
     }
     .barra-export span { font-size: 0.85rem; color: #555; }
 
-    /* ── Painel de abas ── */
+    /* -- Painel de abas -- */
     .abas-nav {
       display: flex;
       flex-wrap: wrap;
@@ -180,7 +319,7 @@
     }
     .aba-conteudo.ativa { display: block; }
 
-    /* ── Tabelas ── */
+    /* -- Tabelas -- */
     table {
       border-collapse: collapse;
       font-size: 0.82rem;
@@ -203,7 +342,7 @@
     tr:nth-child(even) td { background: #f7faf7; }
     tr:hover td { background: #eaf2ec; }
 
-    /* ── Rodapé ── */
+    /* -- Rodape -- */
     footer {
       background: #1a5c2a;
       color: #fff;
@@ -239,62 +378,60 @@
       font-size: 0.78rem;
     }
 
-    /* ── Responsivo ── */
-    @media (max-width: 600px) {
-      .form-row { flex-direction: column; }
-      .form-group { min-width: 100%; }
+    /* -- Responsivo -- */
+    @media (max-width: 700px) {
+      .filter-row { flex-direction: column; }
+      .filter-group { min-width: 100%; }
+      .action-row { flex-direction: column; }
+      .action-row input[type="text"] { width: 100%; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Gerador de Tabelas - Fase 2: Diagnóstico Quantitativo</h1>
+  <h1>Gerador de Tabelas - Fase 2: Diagn&oacute;stico Quantitativo</h1>
   <p>Dados da PNP sobre o IFSP</p>
 </header>
 
 <main>
 
-  <!-- Card de seleção -->
+  <!-- Card de selecao -->
   <div class="card">
-    <h2>Seleção</h2>
-    <div class="form-row">
+    <h2>Filtros</h2>
+
+    <!-- Linha 1: Unidade + Curso -->
+    <div class="filter-row" id="filter-row-1"></div>
+
+    <!-- Linha 2: Tipo de Curso + Tipo de Oferta + Turno -->
+    <div class="filter-row" id="filter-row-2"></div>
+
+    <!-- Linha 3: Nome do arquivo + Processar -->
+    <div class="action-row">
       <div class="form-group">
-        <label for="sel-unidade">Unidade de Ensino</label>
-        <select id="sel-unidade">
-          <option value="">Carregando...</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="sel-curso">Curso</label>
-        <select id="sel-curso" disabled>
-          <option value="">Selecione uma unidade primeiro</option>
-        </select>
-      </div>
-      <div class="form-group" style="max-width:240px;">
-        <label for="inp-arquivo">Nome do arquivo de saída</label>
+        <label for="inp-arquivo">Nome do arquivo de sa&iacute;da</label>
         <input type="text" id="inp-arquivo" placeholder="saida.xlsx">
       </div>
-      <div class="form-group" style="flex:0;">
-        <label style="visibility:hidden;">.</label>
+      <div class="form-group" style="justify-content:flex-end;">
         <button class="btn btn-primary" id="btn-processar" disabled>
           Processar
         </button>
       </div>
     </div>
 
+    <div class="msg-aviso" id="msg-aviso"></div>
     <div class="msg-erro" id="msg-erro"></div>
 
-    <!-- Barra de exportação (aparece após processamento) -->
+    <!-- Barra de exportacao (aparece apos processamento) -->
     <div class="barra-export" id="barra-export">
-      <span>Processamento concluído.</span>
+      <span>Processamento conclu&iacute;do.</span>
       <button class="btn btn-secondary" id="btn-exportar">
-        ⬇ Exportar como .xlsx
+        Exportar como .xlsx
       </button>
     </div>
   </div>
 
-  <!-- Painel de abas (aparece após processamento) -->
+  <!-- Painel de abas (aparece apos processamento) -->
   <div id="painel-abas" style="display:none;">
     <div class="abas-nav" id="abas-nav"></div>
     <div id="abas-conteudo"></div>
@@ -303,17 +440,41 @@
 </main>
 
 <script>
-  const selUnidade  = document.getElementById('sel-unidade');
-  const selCurso    = document.getElementById('sel-curso');
-  const inpArquivo  = document.getElementById('inp-arquivo');
+  // ==========================================================================
+  // Configuracao dos filtros
+  // ==========================================================================
+  const FILTER_DEFS = [
+    { key: 'Unidade de Ensino', label: 'Unidade de Ensino', row: 1, searchable: true },
+    { key: 'Nome de Curso',     label: 'Curso',             row: 1, searchable: true },
+    { key: 'Tipo de Curso',     label: 'Tipo de Curso',     row: 2, searchable: false },
+    { key: 'Tipo de Oferta',    label: 'Tipo de Oferta',    row: 2, searchable: false },
+    { key: 'Turno',             label: 'Turno',             row: 2, searchable: false },
+  ];
+
+  // Estado global dos filtros: { key: [valores selecionados] }
+  const filterState = {};
+  FILTER_DEFS.forEach(d => filterState[d.key] = []);
+
+  // Referencia aos componentes multi-select
+  const msComponents = {};
+
+  // Cache do último job processado (para exportação sem reprocessar)
+  let _lastJobId = null;
+
+  // Elementos DOM fixos
   const btnProcessar = document.getElementById('btn-processar');
   const btnExportar  = document.getElementById('btn-exportar');
   const msgErro      = document.getElementById('msg-erro');
+  const msgAviso     = document.getElementById('msg-aviso');
   const barraExport  = document.getElementById('barra-export');
   const painelAbas   = document.getElementById('painel-abas');
   const abasNav      = document.getElementById('abas-nav');
   const abasConteudo = document.getElementById('abas-conteudo');
+  const inpArquivo   = document.getElementById('inp-arquivo');
 
+  // ==========================================================================
+  // Utilidades
+  // ==========================================================================
   function mostrarErro(msg) {
     msgErro.textContent = msg;
     msgErro.style.display = 'block';
@@ -322,105 +483,380 @@
     msgErro.style.display = 'none';
     msgErro.textContent = '';
   }
+  function mostrarAviso(msg) {
+    msgAviso.textContent = msg;
+    msgAviso.style.display = msg ? 'block' : 'none';
+  }
 
-  // ── Carrega unidades ao abrir a página ──
-  fetch('unidades')
-    .then(r => r.json())
-    .then(lista => {
-      selUnidade.innerHTML = '<option value="">— Selecione —</option>';
-      lista.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = opt.textContent = u;
-        selUnidade.appendChild(opt);
-      });
-    })
-    .catch(() => mostrarErro('Não foi possível carregar as unidades.'));
+  let _debounceTimer = null;
+  function debounce(fn, ms) {
+    clearTimeout(_debounceTimer);
+    _debounceTimer = setTimeout(fn, ms);
+  }
 
-  // ── Atualiza cursos via AJAX ao selecionar unidade ──
-  selUnidade.addEventListener('change', () => {
-    const unidade = selUnidade.value;
-    limparErro();
-    btnProcessar.disabled = true;
-    selCurso.disabled = true;
-    selCurso.innerHTML = '<option value="">Carregando...</option>';
+  // ==========================================================================
+  // Componente Multi-Select
+  // ==========================================================================
+  function createMultiSelect(def) {
+    const container = document.createElement('div');
+    container.className = 'filter-group';
 
-    if (!unidade) {
-      selCurso.innerHTML = '<option value="">Selecione uma unidade primeiro</option>';
-      return;
+    const lbl = document.createElement('label');
+    lbl.textContent = def.label;
+    container.appendChild(lbl);
+
+    const ms = document.createElement('div');
+    ms.className = 'ms';
+
+    // Trigger
+    const trigger = document.createElement('div');
+    trigger.className = 'ms-trigger';
+    trigger.innerHTML = '<span class="ms-label">Carregando...</span><span class="ms-arrow">&#9660;</span>';
+    ms.appendChild(trigger);
+
+    // Panel
+    const panel = document.createElement('div');
+    panel.className = 'ms-panel';
+
+    // Search (opcional)
+    let searchInput = null;
+    if (def.searchable) {
+      searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.className = 'ms-search';
+      searchInput.placeholder = 'Buscar...';
+      panel.appendChild(searchInput);
     }
 
-    fetch('cursos?unidade=' + encodeURIComponent(unidade))
-      .then(r => r.json())
-      .then(lista => {
-        selCurso.innerHTML = '<option value="">— Selecione —</option>';
-        lista.forEach(c => {
-          const opt = document.createElement('option');
-          opt.value = opt.textContent = c;
-          selCurso.appendChild(opt);
+    // Actions
+    const actions = document.createElement('div');
+    actions.className = 'ms-actions';
+    const btnAll = document.createElement('button');
+    btnAll.textContent = 'Selecionar todos';
+    const btnNone = document.createElement('button');
+    btnNone.textContent = 'Limpar';
+    actions.appendChild(btnAll);
+    actions.appendChild(btnNone);
+    panel.appendChild(actions);
+
+    // List
+    const list = document.createElement('div');
+    list.className = 'ms-list';
+    panel.appendChild(list);
+
+    // Impede que cliques dentro do painel fechem o dropdown
+    panel.addEventListener('click', (e) => e.stopPropagation());
+
+    ms.appendChild(panel);
+    container.appendChild(ms);
+
+    // Estado interno
+    let allOptions = [];     // todas as opcoes disponiveis do servidor
+    let selected = new Set(); // valores selecionados
+
+    // --- Funcoes internas ---
+
+    function updateTriggerLabel() {
+      const labelSpan = trigger.querySelector('.ms-label');
+      const oldBadge = trigger.querySelector('.ms-badge');
+      if (oldBadge) oldBadge.remove();
+
+      if (selected.size === 0) {
+        labelSpan.textContent = 'Nenhum selecionado';
+      } else if (selected.size === allOptions.length && allOptions.length > 0) {
+        labelSpan.textContent = 'Todos';
+        const badge = document.createElement('span');
+        badge.className = 'ms-badge';
+        badge.textContent = allOptions.length;
+        trigger.insertBefore(badge, trigger.querySelector('.ms-arrow'));
+      } else if (selected.size <= 2) {
+        labelSpan.textContent = Array.from(selected).join(', ');
+        const badge = document.createElement('span');
+        badge.className = 'ms-badge';
+        badge.textContent = selected.size;
+        trigger.insertBefore(badge, trigger.querySelector('.ms-arrow'));
+      } else {
+        labelSpan.textContent = selected.size + ' selecionados';
+        const badge = document.createElement('span');
+        badge.className = 'ms-badge';
+        badge.textContent = selected.size;
+        trigger.insertBefore(badge, trigger.querySelector('.ms-arrow'));
+      }
+    }
+
+    function renderList() {
+      const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+      list.innerHTML = '';
+      allOptions.forEach(opt => {
+        if (searchTerm && !opt.toLowerCase().includes(searchTerm)) return;
+        const lbl = document.createElement('label');
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = opt;
+        cb.checked = selected.has(opt);
+        cb.addEventListener('change', () => {
+          if (cb.checked) selected.add(opt);
+          else selected.delete(opt);
+          syncState();
         });
-        selCurso.disabled = false;
-      })
-      .catch(() => mostrarErro('Não foi possível carregar os cursos.'));
+        lbl.appendChild(cb);
+        lbl.appendChild(document.createTextNode(opt));
+        list.appendChild(lbl);
+      });
+    }
+
+    function syncState() {
+      filterState[def.key] = Array.from(selected);
+      updateTriggerLabel();
+      debounce(refreshOptions, 150);
+    }
+
+    // --- Eventos ---
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Fechar todos os outros paineis
+      document.querySelectorAll('.ms-panel.open').forEach(p => {
+        if (p !== panel) p.classList.remove('open');
+      });
+      panel.classList.toggle('open');
+      if (panel.classList.contains('open')) {
+        if (searchInput) {
+          searchInput.value = '';
+          searchInput.focus();
+        }
+        renderList();
+      }
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', renderList);
+      searchInput.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    btnAll.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+      allOptions.forEach(opt => {
+        if (!searchTerm || opt.toLowerCase().includes(searchTerm)) {
+          selected.add(opt);
+        }
+      });
+      renderList();
+      syncState();
+    });
+
+    btnNone.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+      if (searchTerm) {
+        allOptions.forEach(opt => {
+          if (opt.toLowerCase().includes(searchTerm)) selected.delete(opt);
+        });
+      } else {
+        selected.clear();
+      }
+      renderList();
+      syncState();
+    });
+
+    // API publica do componente
+    const component = {
+      container,
+      update(options) {
+        allOptions = options;
+        // Remover selecoes invalidas
+        const validSet = new Set(options);
+        for (const val of selected) {
+          if (!validSet.has(val)) selected.delete(val);
+        }
+        filterState[def.key] = Array.from(selected);
+        updateTriggerLabel();
+        if (panel.classList.contains('open')) renderList();
+      },
+      getSelected() { return Array.from(selected); },
+      setSelected(vals) {
+        selected.clear();
+        vals.forEach(v => selected.add(v));
+        filterState[def.key] = Array.from(selected);
+        updateTriggerLabel();
+        if (panel.classList.contains('open')) renderList();
+      },
+    };
+
+    return component;
+  }
+
+  // Fechar paineis ao clicar fora
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.ms-panel.open').forEach(p => p.classList.remove('open'));
   });
 
-  // ── Habilita botão Processar ao selecionar curso ──
-  selCurso.addEventListener('change', () => {
-    btnProcessar.disabled = !selCurso.value;
+  // ==========================================================================
+  // Inicializacao dos filtros
+  // ==========================================================================
+  const row1 = document.getElementById('filter-row-1');
+  const row2 = document.getElementById('filter-row-2');
+
+  FILTER_DEFS.forEach(def => {
+    const comp = createMultiSelect(def);
+    msComponents[def.key] = comp;
+    if (def.row === 1) row1.appendChild(comp.container);
+    else row2.appendChild(comp.container);
+  });
+
+  // ==========================================================================
+  // Cascata: POST /opcoes
+  // ==========================================================================
+  let _refreshing = false;
+  let _refreshPending = false;
+
+  async function refreshOptions() {
+    if (_refreshing) { _refreshPending = true; return; }
+    _refreshing = true;
+    _refreshPending = false;
     limparErro();
-  });
+    mostrarAviso('');
 
-  // ── Processar ──
+    try {
+      // Montar body com filtros nao-vazios
+      const body = {};
+      for (const def of FILTER_DEFS) {
+        const sel = filterState[def.key];
+        if (sel.length > 0) body[def.key] = sel;
+      }
+
+      const r = await fetch('opcoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await r.json();
+
+      if (data.erro) { mostrarErro(data.erro); return; }
+
+      // Atualizar cada componente com opcoes validas
+      for (const def of FILTER_DEFS) {
+        msComponents[def.key].update(data[def.key] || []);
+      }
+
+      // Habilitar/desabilitar botao Processar
+      const temSelecao = FILTER_DEFS.some(d => filterState[d.key].length > 0);
+      const temDados = (data._count || 0) > 0;
+      btnProcessar.disabled = !(temSelecao && temDados);
+
+      // Aviso de volume alto — apenas quando há filtros selecionados
+      const count = data._count || 0;
+      if (temSelecao && count > 200) {
+        mostrarAviso('A seleção atual envolve muitas combinações (' + count + '). O processamento pode levar mais tempo.');
+      }
+    } catch (e) {
+      mostrarErro('Não foi possível carregar as opções de filtro.');
+    } finally {
+      _refreshing = false;
+      if (_refreshPending) refreshOptions();
+    }
+  }
+
+  // Carregamento inicial
+  refreshOptions();
+
+  // ==========================================================================
+  // Processar
+  // ==========================================================================
+  function resetarBotao() {
+    btnProcessar.disabled = false;
+    btnProcessar.textContent = 'Processar';
+  }
+
+  function _pollJob(job_id, startedAt) {
+    fetch('processar/status/' + job_id)
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'pending') {
+          const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+          btnProcessar.innerHTML = '<span class="spinner"></span>Processando&hellip; ' + elapsed + 's';
+          setTimeout(() => _pollJob(job_id, startedAt), 2000);
+        } else if (data.status === 'error') {
+          mostrarErro(data.erro);
+          resetarBotao();
+        } else {
+          // done
+          _lastJobId = data.job_id;
+          resetarBotao();
+          renderizarAbas(data.dados);
+          barraExport.style.display = 'flex';
+          painelAbas.style.display  = 'block';
+
+          // Sugerir nome de arquivo
+          const cursos = filterState['Nome de Curso'];
+          const unidades = filterState['Unidade de Ensino'];
+          let nomeSugerido = '';
+          if (cursos.length === 1) nomeSugerido = cursos[0];
+          else if (unidades.length === 1) nomeSugerido = unidades[0];
+          else nomeSugerido = 'saida';
+          inpArquivo.value = nomeSugerido.replace(/[^a-zA-Z0-9\u00C0-\u00FA ]/g, '').trim().substring(0, 40) || 'saida';
+        }
+      })
+      .catch(() => {
+        mostrarErro('Erro de comunicação com o servidor.');
+        resetarBotao();
+      });
+  }
+
   btnProcessar.addEventListener('click', () => {
     limparErro();
+    mostrarAviso('');
     barraExport.style.display = 'none';
     painelAbas.style.display  = 'none';
 
     btnProcessar.disabled = true;
-    btnProcessar.innerHTML = '<span class="spinner"></span>Processando…';
+    btnProcessar.innerHTML = '<span class="spinner"></span>Processando&hellip;';
 
-    fetch('processar', {
+    const filtros = {};
+    for (const def of FILTER_DEFS) {
+      const sel = filterState[def.key];
+      if (sel.length > 0) filtros[def.key] = sel;
+    }
+
+    fetch('processar/iniciar', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        unidade: selUnidade.value,
-        curso:   selCurso.value,
-      }),
+      body: JSON.stringify({ filtros }),
     })
     .then(r => r.json())
-    .then(dados => {
-      btnProcessar.disabled = false;
-      btnProcessar.textContent = 'Processar';
-
-      if (dados.erro) { mostrarErro(dados.erro); return; }
-
-      renderizarAbas(dados);
-      barraExport.style.display = 'flex';
-      painelAbas.style.display  = 'block';
-
-      // Sugere nome de arquivo com base no curso
-      const nomeSugerido = selCurso.value.replace(/[^a-zA-Z0-9À-ú ]/g, '').trim().substring(0, 40);
-      inpArquivo.value = nomeSugerido || 'saida';
+    .then(({ job_id, erro }) => {
+      if (erro) { mostrarErro(erro); resetarBotao(); return; }
+      _pollJob(job_id, Date.now());
     })
     .catch(() => {
-      btnProcessar.disabled = false;
-      btnProcessar.textContent = 'Processar';
       mostrarErro('Erro de comunicação com o servidor.');
+      resetarBotao();
     });
   });
 
-  // ── Exportar ──
+  // ==========================================================================
+  // Exportar
+  // ==========================================================================
   btnExportar.addEventListener('click', () => {
     let nome = inpArquivo.value.trim() || 'saida';
     if (!nome.endsWith('.xlsx')) nome += '.xlsx';
 
+    // Desabilitar e mostrar spinner
+    btnExportar.disabled = true;
+    const textoOriginal = btnExportar.textContent;
+    btnExportar.innerHTML = '<span class="spinner"></span>Exportando\u2026';
+
+    const filtros = {};
+    for (const def of FILTER_DEFS) {
+      const sel = filterState[def.key];
+      if (sel.length > 0) filtros[def.key] = sel;
+    }
+
     fetch('exportar', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        unidade:      selUnidade.value,
-        curso:        selCurso.value,
-        nome_arquivo: nome,
-      }),
+      body: JSON.stringify({ filtros, nome_arquivo: nome, job_id: _lastJobId }),
     })
     .then(r => {
       if (!r.ok) return r.json().then(j => { throw new Error(j.erro); });
@@ -428,16 +864,22 @@
     })
     .then(blob => {
       const url = URL.createObjectURL(blob);
-      const a   = document.createElement('a');
+      const a = document.createElement('a');
       a.href = url;
       a.download = nome;
       a.click();
       URL.revokeObjectURL(url);
     })
-    .catch(e => mostrarErro(e.message || 'Erro ao exportar o arquivo.'));
+    .catch(e => mostrarErro(e.message || 'Erro ao exportar o arquivo.'))
+    .finally(() => {
+      btnExportar.disabled = false;
+      btnExportar.textContent = textoOriginal;
+    });
   });
 
-  // ── Renderiza painel de abas ──
+  // ==========================================================================
+  // Renderiza painel de abas
+  // ==========================================================================
   function renderizarAbas(dados) {
     abasNav.innerHTML      = '';
     abasConteudo.innerHTML = '';
@@ -447,7 +889,6 @@
     ordemAbas.forEach((aba, idx) => {
       if (!dados[aba]) return;
 
-      // Botão da aba
       const btn = document.createElement('button');
       btn.className = 'aba-btn' + (idx === 0 ? ' ativa' : '');
       btn.textContent = aba;
@@ -455,7 +896,6 @@
       btn.addEventListener('click', () => ativarAba(aba));
       abasNav.appendChild(btn);
 
-      // Conteúdo da aba
       const div = document.createElement('div');
       div.className = 'aba-conteudo' + (idx === 0 ? ' ativa' : '');
       div.id = 'aba-' + aba;
@@ -503,23 +943,23 @@
     <strong>Aviso</strong>
     <ul>
       <li>
-        A Plataforma Nilo Peçanha (PNP) é um instrumento incrível de consolidação de dados e que permite fazer consultas de dados acadêmicos relacionados às instituições da Rede Federal de maneira muito simples e rápida. No entanto, a coisa muda um pouco de figura quando é necessário fazer uma extração mais específica e repetitiva.
-        Este script usa os microdados disponibilizados pela própria Plataforma Nilo Peçanha e otimizados para serem tratados com Python/Pandas. A metodologia utilizada pela PNP e reproduzida aqui está detalhada na documentação nesta <a href="https://www.gov.br/mec/pt-br/pnp/referencia-metodologica" target="_blank">página</a>.
-        Ressalto que este trabalho foi realizado voluntariamente, com o intuito de ajudar os colegas com a tarefa repetitiva de consultar e planilhar dados. Não foi realizada uma validação exaustiva, de modo que aconselho a verificação com os dados disponíveis na PNP.
-        Se tiverem dúvidas, sugestões ou outras necessidades envolvendo dados institucionais, podemos trocar uma ideia por email.<br>
+        A Plataforma Nilo Pe&ccedil;anha (PNP) &eacute; um instrumento incr&iacute;vel de consolida&ccedil;&atilde;o de dados e que permite fazer consultas de dados acad&ecirc;micos relacionados &agrave;s institui&ccedil;&otilde;es da Rede Federal de maneira muito simples e r&aacute;pida. No entanto, a coisa muda um pouco de figura quando &eacute; necess&aacute;rio fazer uma extra&ccedil;&atilde;o mais espec&iacute;fica e repetitiva.
+        Este script usa os microdados disponibilizados pela pr&oacute;pria Plataforma Nilo Pe&ccedil;anha e otimizados para serem tratados com Python/Pandas. A metodologia utilizada pela PNP e reproduzida aqui est&aacute; detalhada na documenta&ccedil;&atilde;o nesta <a href="https://www.gov.br/mec/pt-br/pnp/referencia-metodologica" target="_blank">p&aacute;gina</a>.
+        Ressalto que este trabalho foi realizado voluntariamente, com o intuito de ajudar os colegas com a tarefa repetitiva de consultar e planilhar dados. N&atilde;o foi realizada uma valida&ccedil;&atilde;o exaustiva, de modo que aconselho a verifica&ccedil;&atilde;o com os dados dispon&iacute;veis na PNP.
+        Se tiverem d&uacute;vidas, sugest&otilde;es ou outras necessidades envolvendo dados institucionais, podemos trocar uma ideia por email.<br>
         Prof. Nilson Inocente | IFSP Campus Salto | Abril de 2026
       </li>
     </ul>
-    <strong>Créditos</strong>
+    <strong>Cr&eacute;ditos</strong>
     <ul>
       <li>
-        Concepção, pesquisa e metodologia de análise dos dados da PNP:
-        Prof. Nilson Inocente —
+        Concep&ccedil;&atilde;o, pesquisa e metodologia de an&aacute;lise dos dados da PNP:
+        Prof. Nilson Inocente &mdash;
         <a href="mailto:inocente@ifsp.edu.br">inocente@ifsp.edu.br</a>
       </li>
       <li>
         Sistema Web:
-        Prof. Diego Garrido —
+        Prof. Diego Garrido &mdash;
         <a href="mailto:diego@ifsp.edu.br">diego@ifsp.edu.br</a>
       </li>
     </ul>

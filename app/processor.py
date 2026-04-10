@@ -175,6 +175,16 @@ def processar(unidade, curso):
     df_unidade = df1[df1['Unidade de Ensino'] == unidade]
     df_curso = df_unidade[df_unidade['Nome de Curso'] == curso].copy()
 
+    return _processar_df(df_curso, curso)
+
+
+def processar_multi(df_filtrado, rotulo):
+    """Entrada para filtros multi-select: recebe DataFrame pré-filtrado."""
+    return _processar_df(df_filtrado.copy(), rotulo)
+
+
+def _processar_df(df_curso, rotulo):
+    """Pipeline interno de geração de tabelas — lógica extraída do notebook."""
     # Derivações de colunas (cells [16] e [18])
     df_curso['Ano de Ingresso'] = df_curso['Data de Inicio do Ciclo'].apply(lambda s: int(s.split('/')[2]))
     df_curso['Ano de Conclusão'] = df_curso['Data de Fim Previsto do Ciclo'].apply(lambda s: int(s.split('/')[2]))
@@ -238,7 +248,7 @@ def processar(unidade, curso):
     return {
         'Acesso': {
             'tabelas': [],
-            'df': pd.DataFrame({'Curso': [curso]}),
+            'df': pd.DataFrame({'Curso': [rotulo]}),
         },
         'Matrícula': {
             'tabelas': [
