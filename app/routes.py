@@ -56,6 +56,10 @@ def _carregar_df():
     return pd.read_parquet(config.PARQUET_PATH)
 
 
+def _carregar_df_ef():
+    return pd.read_parquet(config.PARQUET_EF_PATH)
+
+
 def _aplicar_filtros(df, filtros):
     """Aplica filtros multi-select ao DataFrame. Trata NaN do Turno."""
     mask = pd.Series(True, index=df.index)
@@ -231,14 +235,17 @@ def processar_iniciar():
 
     def _run():
         try:
-            df = _carregar_df()
-            df_filtrado = _aplicar_filtros(df, filtros)
+            df       = _carregar_df()
+            df_ef    = _carregar_df_ef()
+            df_filtrado    = _aplicar_filtros(df, filtros)
+            df_ef_filtrado = _aplicar_filtros(df_ef, filtros)
             if df_filtrado.empty:
                 _jobs[job_id]['error'] = 'Nenhum dado encontrado para os filtros selecionados.'
                 _jobs[job_id]['status'] = 'error'
                 return
-            rotulo = _build_rotulo(filtros)
-            dados = processar_multi(df_filtrado, rotulo)
+            rotulo    = _build_rotulo(filtros)
+            turno_str = '/'.join(filtros.get('Turno', []))
+            dados = processar_multi(df_filtrado, df_ef_filtrado, rotulo, turno_str)
             _jobs[job_id]['result'] = _serializar_dados(dados)
             _jobs[job_id]['dados_raw'] = dados
             _jobs[job_id]['status'] = 'done'
@@ -277,14 +284,17 @@ def processar_dados():
         return jsonify({'erro': 'Selecione ao menos um filtro.'}), 400
 
     try:
-        df = _carregar_df()
-        df_filtrado = _aplicar_filtros(df, filtros)
+        df       = _carregar_df()
+        df_ef    = _carregar_df_ef()
+        df_filtrado    = _aplicar_filtros(df, filtros)
+        df_ef_filtrado = _aplicar_filtros(df_ef, filtros)
 
         if df_filtrado.empty:
             return jsonify({'erro': 'Nenhum dado encontrado para os filtros selecionados.'}), 400
 
-        rotulo = _build_rotulo(filtros)
-        dados = processar_multi(df_filtrado, rotulo)
+        rotulo    = _build_rotulo(filtros)
+        turno_str = '/'.join(filtros.get('Turno', []))
+        dados = processar_multi(df_filtrado, df_ef_filtrado, rotulo, turno_str)
         return jsonify(_serializar_dados(dados))
     except FileNotFoundError:
         return jsonify({'erro': 'Arquivo de dados não encontrado. Contate o administrador.'}), 500
@@ -313,14 +323,17 @@ def exportar():
 
         if not dados:
             # Fallback: reprocessar (cache expirado ou ausente)
-            df = _carregar_df()
-            df_filtrado = _aplicar_filtros(df, filtros)
+            df       = _carregar_df()
+            df_ef    = _carregar_df_ef()
+            df_filtrado    = _aplicar_filtros(df, filtros)
+            df_ef_filtrado = _aplicar_filtros(df_ef, filtros)
 
             if df_filtrado.empty:
                 return jsonify({'erro': 'Nenhum dado encontrado para os filtros selecionados.'}), 400
 
-            rotulo = _build_rotulo(filtros)
-            dados = processar_multi(df_filtrado, rotulo)
+            rotulo    = _build_rotulo(filtros)
+            turno_str = '/'.join(filtros.get('Turno', []))
+            dados = processar_multi(df_filtrado, df_ef_filtrado, rotulo, turno_str)
 
         conteudo = exportar_xlsx(dados, nome_arquivo)
         return send_file(
