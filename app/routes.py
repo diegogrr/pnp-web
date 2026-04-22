@@ -201,13 +201,15 @@ def cursos():
 
 def _serializar_dados(dados):
     """Serializa o dict de DataFrames para JSON (lógica comum a /processar)."""
+    def _label(c):
+        if isinstance(c, tuple):
+            return ' | '.join('Ano' if p == 'index' else str(p) for p in c)
+        return 'Ano' if str(c) == 'index' else str(c)
+
     resultado = {}
     for aba, val in dados.items():
         df = val['df']
-        df.columns = [
-            ' | '.join(str(c) for c in col) if isinstance(col, tuple) else str(col)
-            for col in df.columns
-        ]
+        df.columns = [_label(col) for col in df.columns]
         resultado[aba] = {
             'colunas': df.columns.tolist(),
             'linhas': df.fillna('').values.tolist(),

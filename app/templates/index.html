@@ -412,7 +412,10 @@
         <label for="inp-arquivo">Nome do arquivo de sa&iacute;da</label>
         <input type="text" id="inp-arquivo" placeholder="saida.xlsx">
       </div>
-      <div class="form-group" style="justify-content:flex-end;">
+      <div class="form-group" style="justify-content:flex-end;flex-direction:row;gap:8px;">
+        <button class="btn btn-secondary" id="btn-limpar">
+          Limpar
+        </button>
         <button class="btn btn-primary" id="btn-processar" disabled>
           Processar
         </button>
@@ -463,6 +466,7 @@
 
   // Elementos DOM fixos
   const btnProcessar = document.getElementById('btn-processar');
+  const btnLimpar    = document.getElementById('btn-limpar');
   const btnExportar  = document.getElementById('btn-exportar');
   const msgErro      = document.getElementById('msg-erro');
   const msgAviso     = document.getElementById('msg-aviso');
@@ -563,25 +567,26 @@
 
       if (selected.size === 0) {
         labelSpan.textContent = 'Nenhum selecionado';
-      } else if (selected.size === allOptions.length && allOptions.length > 0) {
+        labelSpan.removeAttribute('title');
+        return;
+      }
+
+      if (selected.size <= 2) {
+        const nomes = Array.from(selected).join(', ');
+        labelSpan.textContent = nomes;
+        labelSpan.title = nomes;
+      } else if (selected.size === allOptions.length) {
         labelSpan.textContent = 'Todos';
-        const badge = document.createElement('span');
-        badge.className = 'ms-badge';
-        badge.textContent = allOptions.length;
-        trigger.insertBefore(badge, trigger.querySelector('.ms-arrow'));
-      } else if (selected.size <= 2) {
-        labelSpan.textContent = Array.from(selected).join(', ');
-        const badge = document.createElement('span');
-        badge.className = 'ms-badge';
-        badge.textContent = selected.size;
-        trigger.insertBefore(badge, trigger.querySelector('.ms-arrow'));
+        labelSpan.title = Array.from(selected).join(', ');
       } else {
         labelSpan.textContent = selected.size + ' selecionados';
-        const badge = document.createElement('span');
-        badge.className = 'ms-badge';
-        badge.textContent = selected.size;
-        trigger.insertBefore(badge, trigger.querySelector('.ms-arrow'));
+        labelSpan.title = Array.from(selected).join(', ');
       }
+
+      const badge = document.createElement('span');
+      badge.className = 'ms-badge';
+      badge.textContent = selected.size;
+      trigger.insertBefore(badge, trigger.querySelector('.ms-arrow'));
     }
 
     function renderList() {
@@ -762,6 +767,34 @@
   refreshOptions();
 
   // ==========================================================================
+  // Limpar
+  // ==========================================================================
+  function limparTudo() {
+    // Limpa seleções de todos os filtros
+    FILTER_DEFS.forEach(def => {
+      msComponents[def.key].setSelected([]);
+    });
+
+    // Limpa resultado, barra de exportação e mensagens
+    barraExport.style.display  = 'none';
+    painelAbas.style.display   = 'none';
+    abasNav.innerHTML           = '';
+    abasConteudo.innerHTML      = '';
+    limparErro();
+    mostrarAviso('');
+
+    // Limpa campo de nome de arquivo e estado de job
+    inpArquivo.value = '';
+    _lastJobId = null;
+
+    // Desabilita "Processar" e recarrega opções a partir do zero
+    btnProcessar.disabled = true;
+    refreshOptions();
+  }
+
+  btnLimpar.addEventListener('click', limparTudo);
+
+  // ==========================================================================
   // Processar
   // ==========================================================================
   function resetarBotao() {
@@ -885,13 +918,19 @@
     abasConteudo.innerHTML = '';
 
     const ordemAbas = ['Acesso', 'Matrícula', 'Conclusão', 'Evasão', 'Retenção', 'Eficiência', 'PAP'];
+    const labelAbas = {
+      'Conclusão': 'Conclusão no ciclo',
+      'Evasão': 'Evasão no ciclo',
+      'Retenção': 'Retenção no ciclo',
+      'Eficiência': 'Eficiência acadêmica'
+    };
 
     ordemAbas.forEach((aba, idx) => {
       if (!dados[aba]) return;
 
       const btn = document.createElement('button');
       btn.className = 'aba-btn' + (idx === 0 ? ' ativa' : '');
-      btn.textContent = aba;
+      btn.textContent = labelAbas[aba] || aba;
       btn.dataset.aba = aba;
       btn.addEventListener('click', () => ativarAba(aba));
       abasNav.appendChild(btn);
