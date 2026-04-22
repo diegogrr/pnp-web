@@ -334,11 +334,214 @@ situação. Isso permite responder corretamente: *"dos 21 alunos brancos em 2023
 
 ---
 
+## 6. Ajustes de exibição na tabela renderizada pelo `index.html`
+
+**Arquivos afetados:** `app/templates/index.html`, `app/routes.py`
+**Data:** 2026-04-21
+
+### 6.1 Renomeação dos rótulos das abas
+
+Os nomes exibidos nas abas da tabela foram atualizados para tornar o vocabulário
+mais preciso. A alteração é puramente visual: as chaves internas usadas para
+acessar os dados (`dados[aba]`, `dataset.aba`, `div.id`) e os nomes das abas
+na planilha `.xlsx` gerada permanecem inalterados.
+
+| Chave interna (inalterada) | Rótulo anterior | Rótulo atual |
+|---|---|---|
+| `Conclusão` | Conclusão | Conclusão no ciclo |
+| `Evasão` | Evasão | Evasão no ciclo |
+| `Retenção` | Retenção | Retenção no ciclo |
+| `Eficiência` | Eficiência | Eficiência acadêmica |
+
+**O que foi alterado em `index.html`:** adicionado o objeto `labelAbas` na
+função `renderizarAbas`. O `btn.textContent` de cada aba usa
+`labelAbas[aba] || aba` em vez de `aba` diretamente, desacoplando o rótulo
+visual da chave de dados.
+
+### 6.2 Renomeação do cabeçalho de coluna `index` → `Ano`
+
+Colunas de ano identificadas como `"index"` — tanto colunas simples quanto
+fragmentos de MultiIndex serializado (ex.: `"index | Quant."`, `"index | %"`) —
+passaram a ser exibidas como `"Ano"` na tabela da página web.
+
+**Causa raiz:** o pandas nomeia automaticamente como `"index"` a coluna de
+ano resultante de `groupby` + `reset_index`. Na serialização para JSON,
+colunas MultiIndex são achatadas em strings com `' | '` (`"index | Quant."`),
+fazendo com que a substituição simples de string exata no frontend não cobrisse
+todos os casos.
+
+**O que foi alterado em `routes.py` — função `_serializar_dados`:**
+adicionada a função auxiliar interna `_label(c)` que, ao montar o nome de cada
+coluna, substitui qualquer fragmento `"index"` por `"Ano"` — seja em colunas
+simples ou em cada parte de uma tupla de MultiIndex:
+
+```python
+def _label(c):
+    if isinstance(c, tuple):
+        return ' | '.join('Ano' if p == 'index' else str(p) for p in c)
+    return 'Ano' if str(c) == 'index' else str(c)
+```
+
+A substituição ocorre apenas no JSON enviado ao frontend; o DataFrame e a
+planilha `.xlsx` não são afetados.
+
+---
+
+## 7. Correção: IEA ausente em anos com situações parciais na aba Eficiência
+
+**Função afetada:** `gera_eficiencia_ciclo`
+**Arquivo:** `processor.py`
+**Data:** 2026-04-21
+
+### 7.1 O problema
+
+A aba **Eficiência acadêmica** (tabela21) não exibia o IEA em anos onde o
+curso possuía dados confirmados na Plataforma Nilo Peçanha. O problema se
+manifestava em cursos de qualquer campus e variava de ano para ano, mesmo
+quando os dados de Conclusão, Evasão e Retenção estavam disponíveis e
+apareciam corretamente nas demais abas.
+
+**Causa raiz:** após o `unstack()` que pivota as situações em colunas, anos
+em que nem todas as três situações (`Conclusão`, `Retenção`, `Evasão`) possuem
+registros ficam com `NaN` nas células ausentes. O guard defensivo
+(`if col not in df_indicadores.columns`) cobre apenas o caso em que a **coluna
+inteira** está ausente — não preenche `NaN` em linhas individuais dentro de
+uma coluna existente. Como resultado:
+
+```
+# Exemplo: ano 2022 sem alunos em Retenção
+#   Conclusão = 5, Retenção = NaN, Evasão = 2
+
+Total = 5 + NaN + 2  →  NaN
+IEA   = NaN / Total  →  NaN  →  exibido como célula vazia
+```
+
+O `fillna('')` aplicado ao final (após o `reindex`) não resolvia o problema,
+pois o `NaN` já havia se propagado para o IEA antes disso.
+
+### 7.2 A correção
+
+Adicionado `df_indicadores = df_indicadores.fillna(0)` imediatamente após as
+guardas defensivas e antes do cálculo de `Total` e `IEA`:
+
+```python
+for col in ['Conclusão', 'Retenção', 'Evasão']:
+    if col not in df_indicadores.columns:
+        df_indicadores[col] = 0
+
+df_indicadores = df_indicadores.fillna(0)   # ← adicionado
+df_indicadores['Total'] = df_indicadores.sum(axis=1)
+df_indicadores['IEA'] = (...)
+```
+
+Essa linha já existia na função `gera_eficiencia_ciclo_estratificado` (versão
+estratificada, que não apresentava o problema). A correção alinha as duas
+funções e garante que anos com situações parciais — por exemplo, um ano com
+Conclusão e Evasão mas sem nenhum aluno em Retenção — tenham `Total` e `IEA`
+calculados corretamente.
+
+### 7.3 O que não foi alterado
+
+- A fórmula do IEA permanece inalterada.
+- Casos em que `Conclusão + Evasão = 0` (ciclo ainda completamente em curso)
+  continuam retornando IEA vazio, pois o cálculo é genuinamente indefinido
+  nesses anos.
+- Nenhuma outra tabela foi afetada.
+
+---
+
+## 8. Correção de exibição do rótulo nos filtros multi-select
+
+**Arquivo afetado:** `app/templates/index.html`
+**Data:** 2026-04-21
+
+### 8.1 O problema
+
+Um usuário reportou que, ao selecionar combinações específicas via filtros em cascata
+(ex.: Unidade = Avaré → Tipo de Curso: Técnico → Tipo de Oferta: Integrado →
+Turno: Integral), o trigger de cada filtro exibia **"Todos"** em vez do item
+selecionado, mesmo tendo sido marcada apenas uma opção.
+
+**Causa raiz:** na função `updateTriggerLabel`, a condição
+`selected.size === allOptions.length` era verificada **antes** de `selected.size <= 2`.
+Após a atualização em cascata pelo endpoint `/opcoes`, dimensões como Tipo de Curso
+e Turno podem ficar com apenas uma opção válida disponível. Ao selecionar essa única
+opção, `selected.size === allOptions.length === 1`, fazendo o ramo "Todos" ser
+ativado — tecnicamente correto, mas sem significado para o usuário, que escolheu
+explicitamente um item.
+
+### 8.2 A correção
+
+Reordenação dos branches em `updateTriggerLabel` para que a exibição de nomes
+individuais seja verificada com prioridade:
+
+| Condição | Comportamento anterior | Comportamento atual |
+|---|---|---|
+| 0 selecionados | "Nenhum selecionado" | "Nenhum selecionado" (igual) |
+| 1–2 selecionados, coincidindo com total disponível | "Todos" + badge | **nome(s)** + badge |
+| 1–2 selecionados, parcial | nome(s) + badge | nome(s) + badge (igual) |
+| 3+ selecionados, todos disponíveis | "Todos" + badge | "Todos" + badge (igual) |
+| 3+ selecionados, parcial | "N selecionados" + badge | "N selecionados" + badge (igual) |
+
+Também foi adicionado o atributo `title` no `<span class="ms-label">` com a lista
+completa dos itens selecionados. Quando o texto é truncado pela elipse do CSS
+(nomes longos em filtro estreito), o tooltip nativo exibe a lista ao passar o mouse.
+
+### 8.3 O que não foi alterado
+
+- Nenhum dado transmitido ao backend é afetado: a exibição é puramente visual.
+  `filterState[def.key]` (array enviado a `/opcoes`, `/processar` e `/exportar`)
+  permanece idêntico.
+- O rótulo "Todos" é preservado para o caso em que 3 ou mais itens são selecionados
+  e coincidem com todas as opções disponíveis, evitando overflow de string no trigger.
+- Nenhum estilo CSS foi modificado.
+
+---
+
+## 9. Adição do botão "Limpar" na interface
+
+**Arquivo afetado:** `app/templates/index.html`
+**Data:** 2026-04-21
+
+### 9.1 O que foi adicionado
+
+Adicionado o botão **"Limpar"** ao lado do botão "Processar" na linha de ação
+do card de filtros. Ao ser clicado, executa a função `limparTudo()`, que
+restaura a interface ao estado inicial sem recarregar a página.
+
+### 9.2 Comportamento da função `limparTudo()`
+
+A função realiza as seguintes ações em sequência:
+
+1. **Limpa todas as seleções** — chama `setSelected([])` em cada um dos cinco
+   componentes multi-select, zerando `filterState` para todas as dimensões.
+2. **Oculta os resultados** — esconde a barra de exportação (`#barra-export`)
+   e o painel de abas (`#painel-abas`), limpa o conteúdo de `#abas-nav` e
+   `#abas-conteudo`.
+3. **Limpa mensagens** — remove erros e avisos de volume exibidos.
+4. **Reseta estado de job** — zera `_lastJobId` e limpa o campo
+   `#inp-arquivo`.
+5. **Desabilita "Processar"** — volta ao estado desabilitado, pois não há
+   seleção ativa.
+6. **Recarrega as opções** — chama `refreshOptions()`, que consulta `POST
+   /opcoes` sem filtros e repopula todos os multi-selects com o conjunto
+   completo de opções disponíveis — equivalente ao carregamento inicial.
+
+### 9.3 O que não foi alterado
+
+- Nenhuma lógica de backend, rota ou processamento foi modificada.
+- O botão "Processar" e toda a lógica de polling assíncrono permanecem
+  inalterados.
+- O estilo visual usa a classe `.btn-secondary` já existente, sem
+  adição de CSS novo.
+
+---
+
 ## Resumo das funções alteradas ou criadas
 
 | Função | Arquivo | Tipo de alteração |
 |---|---|---|
-| `gera_eficiencia_ciclo` | `processor.py` | Correção de bug (guard block) + reescrita v2 (groupby simples) |
+| `gera_eficiencia_ciclo` | `processor.py` | Correção de bug (guard block) + reescrita v2 (groupby simples) + correção fillna(0) antes do IEA |
 | `gera_eficiencia_ciclo_estratificado` | `processor.py` | Correção de bug (guard block) + reescrita v2 (groupby simples) |
 | `gera_tabela_estratificada` | `processor.py` | Parâmetro `df_denominador` — corrige % nas abas de ciclo |
 | `_processar_df` | `processor.py` | Assinatura ampliada (dois DFs); Correção reindex tabela1; criada por refatoração |
@@ -349,3 +552,4 @@ situação. Isso permite responder corretamente: *"dos 21 alunos brancos em 2023
 | `_aplicar_filtros` | `routes.py` | Criada (filtragem multi-select com suporte a NaN) |
 | `_build_rotulo` | `routes.py` | Criada (rótulo descritivo a partir dos filtros) |
 | `_get_combos` | `routes.py` | Criada (cache de combinações para cascata) |
+| `limparTudo` | `index.html` | Criada (reseta filtros, resultados e estado ao estado inicial) |
