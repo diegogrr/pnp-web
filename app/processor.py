@@ -103,6 +103,7 @@ def gera_eficiencia_ciclo(df_ef):
         if col not in df_indicadores.columns:
             df_indicadores[col] = 0
 
+    df_indicadores = df_indicadores.fillna(0)
     df_indicadores['Total'] = df_indicadores.sum(axis=1)
     df_indicadores['IEA'] = ((
         df_indicadores['Conclusão'] +
